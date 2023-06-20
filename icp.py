@@ -14,6 +14,21 @@ def draw_registration_result(source, target, transformation):
                                       lookat=[1.6784, 2.0612, 1.4451],
                                       up=[-0.3402, -0.9189, -0.1996])
 
+def icp_registration(source, target, correspondences, max_iterations=100, threshold=0.001):
+    # ICP 알고리즘을 설정합니다.
+    icp = o3d.pipelines.registration.TransformationEstimationPointToPlane()
+    criteria = o3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=max_iterations,
+                                                                relative_fitness=threshold,
+                                                                relative_rmse=threshold)
+
+    # ICP를 통해 source 포인트 클라우드를 target에 정합합니다.
+    transformation = o3d.pipelines.registration.registration_icp(source, target, threshold, np.eye(4),
+                                                                 icp, criteria, correspondences)
+
+    # 정합된 포인트 클라우드를 반환합니다.
+    transformed_source = o3d.pipelines.registration.transform_point_cloud(source, transformation.transformation)
+
+    return transformed_source
 
 # demo_icp_pcds = o3d.data.DemoICPPointClouds()
 # source = o3d.io.read_point_cloud(demo_icp_pcds.paths[0])
